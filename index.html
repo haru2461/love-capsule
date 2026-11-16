@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Love Capsule</title>
+<style>
+:root{--bg:#000;--body:#cfc3a6;--body2:#a89d82;--ink:#2b2820;--screen:#0b0d0c;--pink:#e2557f;--paper:#f6f0e1;--text:#e8e2d2;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{min-height:100%;margin:0}
+*{box-sizing:border-box}
+body{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;display:flex;align-items:center;justify-content:center;overflow-x:hidden}
+.stage{margin:auto;position:relative;width:min(92vw,380px);padding:20px 0 40px}
+.note-wrap{position:absolute;right:-6px;top:78px;width:120px;height:90px;z-index:0;transform:translateX(70px) rotate(8deg);opacity:0;transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .6s;cursor:pointer;border:0;background:none;padding:0}
+.note-wrap.peek{opacity:1;transform:translateX(34px) rotate(8deg)}
+.note-wrap.peek:hover{transform:translateX(20px) rotate(5deg)}
+.note-wrap span{display:block;width:100%;height:100%;background:var(--paper);border-radius:3px;box-shadow:0 2px 10px #0008;color:#6a5d3f;font:italic 15px Georgia,serif;padding:10px 0 0 14px;text-align:left}
+.tv{position:relative;z-index:1;background:linear-gradient(145deg,#e9dfc5,#cfc3a6 50%,#b3a888);border-radius:26px;padding:18px 18px 14px;box-shadow:inset -2px 0 3px #0003,inset 0 -4px 8px #0005,0 1px 1px #000a,0 4px 6px #0007,0 14px 20px #000a,0 30px 50px #000c}
+.screw{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f2ead3,#9a8f74 60%,#6d634c);box-shadow:inset 0 0 0 1px #0004,0 1px 1px #fff8,0 -1px 1px #0003}
+.screw:after{content:"";position:absolute;left:1px;right:1px;top:4px;height:2px;background:#4b4333;transform:rotate(35deg);border-radius:1px}
+.screw.s1{left:8px;top:8px}.screw.s2{right:8px;top:8px}.screw.s3{left:8px;bottom:8px}.screw.s4{right:8px;bottom:8px}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 6px 4px}
+.grille{flex:none;width:84px;height:24px;border-radius:5px;background:repeating-linear-gradient(90deg,#2b2820 0 2px,#8d836a 2px 5px);box-shadow:inset 0 2px 4px #000c,0 1px 0 #fff8}
+.foot .brand{margin:0;flex:1}
+.knobs{display:flex;gap:10px;flex:none}
+.knob{position:relative;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#efe6cd,#b3a888 55%,#7d735c);box-shadow:inset 0 0 0 2px #6d634c66,0 3px 0 #6d634c,0 6px 7px #0006}
+.knob:after{content:"";position:absolute;left:11px;top:3px;width:2px;height:8px;background:#3a3326;border-radius:1px;transform-origin:50% 9px;transform:rotate(var(--a,30deg))}
+.vents{display:flex;flex-direction:column;gap:3px;margin:8px 44px 2px}
+.vents b{display:block;height:3px;border-radius:2px;background:#6d634c;box-shadow:inset 0 1px 1px #000a,0 1px 0 #fff7}
+.tv:after{content:"";position:absolute;left:30px;right:30px;bottom:-12px;height:12px;background:#8d836a;border-radius:0 0 12px 12px}
+.screen{position:relative;height:0;padding-bottom:75%;background:var(--screen);border-radius:26px/22px;overflow:hidden;box-shadow:inset 0 0 0 6px #1b1b19,inset 0 0 44px #000,0 0 0 3px #7d735c,0 0 0 5px #efe6cd,0 4px 0 5px #6f6650,0 8px 10px 5px #0006}
+.screen video,.screen .msg{position:absolute;inset:0;width:100%;height:100%}
+.screen video{object-fit:cover;display:none;background:#000}
+.screen.playing video{display:block}
+.msg{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;font-style:italic;color:#9fb0a4;font-size:15px;padding:16px}
+.screen.playing .msg{display:none}
+.msg b{font:700 54px/1 Georgia,serif;color:#eee}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,#0000 0 2px,#0000002e 2px 3px);pointer-events:none;border-radius:inherit}
+.scan:after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 50% 50%,#0000 52%,#000b 100%)}
+.slot{position:relative;margin:14px 6px 10px;height:16px;background:#14130f;border-radius:6px;box-shadow:inset 0 2px 4px #000;overflow:hidden;cursor:default}
+.slot.live{cursor:pointer}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#c4416a,var(--pink));border-radius:6px 0 0 6px;box-shadow:0 0 8px #e2557f88}
+.brand{text-align:center;font:600 10px/1 system-ui,sans-serif;letter-spacing:.35em;color:#7a705a;margin:6px 0}
+.ctrls{display:flex;gap:6px;align-items:center;justify-content:center;background:#b9ae92;padding:8px;border-radius:12px;box-shadow:inset 0 1px 3px #0004}
+.ctrls button{flex:1;min-width:0;height:40px;border:0;border-radius:8px;background:linear-gradient(#e6dcc2,#c8bca0);box-shadow:inset 0 1px 0 #fffa,0 4px 0 #7d735c,0 7px 8px #0005;font-size:16px;color:var(--ink);cursor:pointer;transition:transform .06s,box-shadow .06s}
+.ctrls button:active{transform:translateY(4px);box-shadow:inset 0 1px 0 #fff6,0 0 0 #7d735c,0 2px 3px #0005}
+.ctrls button:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+.led{width:10px;height:10px;border-radius:50%;background:#522;flex:none}
+.led.on{background:#f33;box-shadow:0 0 8px #f33}
+.deck{margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:20px;min-height:150px}
+.tapes{position:relative;width:256px;height:170px}
+.deckbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.insert{background:var(--pink);color:#fff;border:0;border-radius:999px;padding:13px 22px;font:700 13px system-ui,sans-serif;letter-spacing:.18em;cursor:pointer;box-shadow:0 6px 22px #e2557f55}
+.insert.alt{background:transparent;color:var(--pink);border:2px solid var(--pink);box-shadow:none;padding:11px 20px}
+.insert:disabled{opacity:.5;cursor:default}
+.tape{position:absolute;left:0;bottom:0;z-index:2;display:block;padding:0;border:0;cursor:pointer;color:inherit;font:inherit;width:256px;height:142px;background:linear-gradient(180deg,#26262c 0%,#141418 60%,#0d0d10 100%);border-radius:7px;transform:none;transform-origin:50% 70%;box-shadow:inset 0 0 0 2px #33333b,inset 0 2px 0 #5a5a6677,0 1px 0 #2a2a31,0 2px 0 #26262d,0 3px 0 #222228,0 4px 0 #1e1e24,0 5px 0 #1a1a1f,0 6px 0 #16161b,0 7px 0 #121217,0 8px 0 #0e0e12,0 24px 26px #000d;transition:transform .65s cubic-bezier(.3,.7,.3,1),filter .65s}
+.tape.slide{transform:translateX(165px) translateY(-10px) rotate(8deg);transition:transform .38s ease-out;pointer-events:none}
+.tape:hover{filter:brightness(1.15)}
+.tape:after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,#fff3 0%,#fff0 35%);pointer-events:none}
+.tape:before{content:"LOVECAPSULE";position:absolute;left:50%;bottom:0;width:62%;height:24px;transform:translateX(-50%);background:linear-gradient(#e2d8bc,#bfb393);border-radius:5px 5px 0 0;color:#6d634c;font:600 7px/24px system-ui,sans-serif;letter-spacing:.35em;text-align:center;box-shadow:inset 0 1px 0 #fff8,0 -1px 0 #0006}
+.tape i{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:88%;height:50px;background:linear-gradient(#ece3ca,#d6cbae);border-radius:3px;box-shadow:inset 0 0 0 1px #a89d8244,0 1px 2px #0008;font:italic 19px/1.1 Georgia,serif;color:#3a3326;padding:8px 12px;text-align:left}
+.tape i small{display:block;font:italic 14px/1.2 Georgia,serif;color:#7a705a;margin-top:3px}
+.tape u{position:absolute;bottom:36px;width:36px;height:36px;border-radius:50%;background:radial-gradient(circle,#e8e1cc 0 20%,#4a4a52 22% 56%,#1c1c21 58%);box-shadow:inset 0 0 0 3px #08080a,0 1px 0 #5a5a6677}
+.tape u:nth-of-type(1){left:54px}.tape u:nth-of-type(2){right:54px}
+.tape.back{z-index:1;transform:translateY(-22px) scale(.93) rotate(-2deg);filter:brightness(.6);pointer-events:none}
+.tape.back.rise{filter:brightness(1);transition:filter .38s,transform .65s cubic-bezier(.3,.7,.3,1)}
+.tape.out{z-index:0;pointer-events:none}
+.tape.in{z-index:0;transform:translateY(-235px) scale(.82);pointer-events:none;transition:transform .9s cubic-bezier(.5,0,.75,.6)}
+.pick{font:600 11px system-ui,sans-serif;letter-spacing:.25em;color:#8d836a;text-align:center;text-transform:uppercase;min-height:14px}
+.hide{display:none}
+.modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal.open{display:flex}
+.paper{background:var(--paper);color:#3b3426;max-width:420px;width:100%;max-height:94vh;max-height:94dvh;overflow:auto;border-radius:4px;padding:22px 22px 14px;font:italic 21px/1.5 Georgia,serif;box-shadow:0 20px 60px #000;transform:rotate(-1.2deg);animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.7) rotate(6deg);opacity:0}}
+.paper h2{font:italic 700 1.25em Georgia,serif;margin:0 0 .4em}
+.paper h2.center{text-align:center}
+.paper p{margin:0 0 12px}
+.paper .sig{text-align:right}
+.paper button{display:block;margin:12px auto 0;border:0;background:none;font:600 12px system-ui,sans-serif;letter-spacing:.2em;color:#8a7d5e;cursor:pointer;border-bottom:1px solid #8a7d5e}
+.tv{margin:0 18px}
+.note-wrap.note-left{right:auto;left:-6px;top:110px;transform:translateX(70px) rotate(-8deg)}
+.note-wrap.note-left span{padding:10px 0 0 8px}
+.note-wrap.note-left.peek{opacity:1;transform:translateX(-12px) rotate(-8deg);animation:wiggle 1.4s ease-in-out 4}
+.note-wrap.note-left.peek:hover{transform:translateX(-4px) rotate(-5deg)}
+.note-wrap.note-left.peek span{animation:glow 1.3s ease-in-out infinite}
+.note-wrap.note-left.seen,.note-wrap.note-left.seen span{animation:none}
+@keyframes wiggle{0%,100%{transform:translateX(-12px) rotate(-8deg)}25%{transform:translateX(-22px) rotate(-14deg)}50%{transform:translateX(-8px) rotate(-5deg)}75%{transform:translateX(-20px) rotate(-12deg)}}
+@keyframes glow{0%,100%{box-shadow:0 2px 10px #0008}50%{box-shadow:0 0 18px 4px #e2557faa}}
+.paper .choices{display:flex;gap:12px;margin:18px 0 6px}
+.paper .choices button{flex:1;display:block;margin:0;border:2px solid var(--pink);border-radius:999px;padding:13px 10px;font:700 13px system-ui,sans-serif;letter-spacing:.18em;cursor:pointer;transition:opacity .45s}
+.paper .choices .yes{background:var(--pink);color:#fff}
+.paper .choices .no{background:transparent;color:var(--pink)}
+.paper .choices .fade{opacity:0}
+.plan{font:17px/1.5 Georgia,serif;font-style:normal;transform:none}
+.plan h2{margin-bottom:16px;font-size:24px}
+.plan label{display:block;margin:0 0 12px;font-style:italic;font-size:15px;color:#6a5d3f}
+.plan input,.plan textarea,.plan select{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid #cdbf9c;border-radius:8px;background:#fffaf0;font:16px system-ui,sans-serif;color:#3b3426}
+.plan input.hide{display:none}
+.plan .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.paper .chips button{display:inline-block;margin:0;border:1px solid #c9ba94;background:#fffaf0;color:#6a5d3f;border-radius:999px;padding:8px 14px;font:14px system-ui,sans-serif;letter-spacing:0;cursor:pointer}
+.paper .chips button.on{background:var(--pink);border-color:var(--pink);color:#fff}
+.paper .send:disabled{opacity:.6}
+.paper .send{width:100%;margin:6px 0 0;border:0;border-radius:999px;padding:13px;background:var(--pink);color:#fff;font:700 13px system-ui,sans-serif;letter-spacing:.18em}
+.plan #pDone{text-align:center;font-size:15px;color:#6a5d3f;margin:10px 0 0;min-height:1.2em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="stage">
+  <button class="note-wrap" id="noteBtn" aria-label="Open the note"><span>for you…</span></button>
+  <button class="note-wrap note-left" id="noteBtn2" aria-label="Open the second note"><span>one more…</span></button>
+  <section class="tv">
+    <div class="screen" id="screen">
+      <video id="vid" playsinline></video>
+      <div class="msg" id="msg"><b id="big">▶</b><span id="hint">Pick a cassette to begin</span></div>
+      <div class="scan"></div>
+    </div>
+    <div class="slot" id="track" role="progressbar" aria-label="Video progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill"></div></div>
+    <div class="brand">VIDEO CASSETTE</div>
+    <div class="ctrls">
+      <span class="led" id="led"></span>
+      <button id="rew" aria-label="Rewind" disabled>◀◀</button>
+      <button id="play" aria-label="Play" disabled>▶</button>
+      <button id="pause" aria-label="Pause" disabled>❚❚</button>
+      <button id="fwd" aria-label="Forward" disabled>▶▶</button>
+      <button id="again" aria-label="Replay" disabled>↻</button>
+      <button id="eject" aria-label="Eject cassette" disabled>⏏</button>
+    </div>
+    <div class="foot">
+      <div class="grille"></div>
+      <div class="brand">LOVECAPSULE</div>
+      <div class="knobs"><span class="knob" style="--a:-35deg"></span><span class="knob" style="--a:40deg"></span></div>
+    </div>
+    <div class="vents"><b></b><b></b><b></b></div>
+    <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+  </section>
+  <div class="deck">
+    <div class="tapes" id="tapes"></div>
+    <div class="pick" id="pick"></div>
+    <div class="deckbtns">
+      <button class="insert" id="insert">INSERT</button>
+      <button class="insert alt" id="switch">SWITCH TAPE</button>
+    </div>
+  </div>
+</main>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="paper">
+    <h2 id="nTitle">for you</h2>
+    <div id="nBody"></div>
+    <div id="nActions"></div>
+    <button id="close">CLOSE</button>
+  </div>
+</div>
+
+<div class="modal" id="planner" role="dialog" aria-modal="true">
+  <div class="paper plan">
+    <h2 id="pTitle">let's plan our date</h2>
+    <label>Which day?<input type="date" id="pDate"></label>
+    <label>What time?<input type="time" id="pTime"></label>
+    <label>Where should we meet?<input type="text" id="pPlace" placeholder="the meet up place"></label>
+    <label>What should we do?</label>
+    <div class="chips" id="chips"></div>
+    <input type="text" id="pOther" class="hide" placeholder="type your own plan" style="margin:-4px 0 14px">
+    <label>What to wear?<select id="pWear"><option value="">Choose one</option><option>Formal</option><option>Natural</option></select></label>
+    <label>Anything else?<textarea id="pNote" rows="2"></textarea></label>
+    <button class="send" id="pSend">SEND MY PLAN</button>
+    <p id="pDone"></p>
+    <button id="pClose">CLOSE</button>
+  </div>
+</div>
+
+<script>
+/* ===== EDIT THESE ===== */
+// TWO CASSETTES. Each one has its own label (2 lines) and its own video.
+// For each video use ONE of these:
+//   src:    a video file next to this page, e.g. "video1.mp4"  (leave base64 "" if you use this)
+//   base64: the video embedded in this code. Paste the base64 text between the quotes (leave src "")
+const CASSETTES = [
+  {
+    label: ["us - panata", "jan '23 – sept '26"],
+    src: "panata.mp4",
+    base64: "",
+    type: "video/mp4"
+  },
+  {
+    label: ["us - ikaw lang nobita", "add your dates"],
+    src: "ikawlang.mp4",
+    base64: "",
+    type: "video/mp4"
+  }
+];
+const NOTE_TITLE = "for you";
+const NOTE_LINES = [
+  "henlu loml.",
+  "every time i miss you, i watch the old videos of us or reread the letters you wrote before.",
+  "wish nga naa ka sa duol para mas maka express kung unsay ganahan n wlay misunderstanding",
+  "I'm sorry sa mga sayop nga nabuhat. sorry kaayo i regret them, sorry wla nko nabantayan imo na feel. sorry cgi ka fall short.",
+  "i hope nga there's still a chance for us to start again.",
+  "can we start again?",
+  "i love you, i miss you amping ka permi"
+];
+const NOTE_SIGN = "i love you always,";
+const NOTE2_TITLE = "eniways, do you have time?";
+const NOTE2_LINES = [];
+const NOTE2_SIGN = "";
+// DATE PLANNER (opens after they answer the second letter)
+const PLAN_TITLE = "let's plan our date";
+const PLAN_IDEAS = ["street food date", "normal date", "movie night", "coffee date", "art date", "walk by the sea", "surprise me"];
+// SEND TO YOUR GMAIL AUTOMATICALLY: make a free form at formspree.io using your Gmail, then paste its link here, e.g. "https://formspree.io/f/abcdwxyz"
+const PLANNER_FORM = "https://formspree.io/f/mdegeboe";
+// Or leave the line above empty and put your Gmail here: their phone opens an email with the plan filled in and they press Send
+const PLANNER_EMAIL = "";
+// Your phone number so the plan is texted to you, e.g. "+639171234567". Leave "" to use the phone's share menu.
+const PLANNER_SMS = "";
+/* ====================== */
+const $ = id => document.getElementById(id);
+const vid = $('vid'), screen = $('screen'), led = $('led'), track = $('track'), fill = $('fill');
+const btns = ['rew','play','pause','fwd','again','eject'].map($);
+
+/* ---------- cassettes ---------- */
+const tapeEls = [];
+CASSETTES.forEach((c, i) => {
+  const t = document.createElement('button');
+  t.type = 'button'; t.className = 'tape';
+  t.setAttribute('aria-label', 'Cassette ' + (i + 1) + ': ' + c.label[0]);
+  const lab = document.createElement('i');
+  lab.appendChild(document.createTextNode(c.label[0]));
+  const sm = document.createElement('small'); sm.textContent = c.label[1]; lab.appendChild(sm);
+  t.append(lab, document.createElement('u'), document.createElement('u'));
+  t.onclick = () => choose(i);
+  $('tapes').appendChild(t); tapeEls.push(t);
+});
+
+let topIdx = 0;
+function renderStack(){ tapeEls.forEach((t,i)=>t.classList.toggle('back', i !== topIdx)); }
+function idlePick(){ $('pick').textContent = 'on deck: ' + CASSETTES[topIdx].label[0]; }
+renderStack(); idlePick();
+
+const urlCache = {};
+function srcFor(i){
+  const c = CASSETTES[i];
+  if(c.base64){
+    if(!urlCache[i]){
+      const bin = atob(c.base64.replace(/\s/g,''));
+      const bytes = new Uint8Array(bin.length);
+      for(let k=0;k<bin.length;k++) bytes[k] = bin.charCodeAt(k);
+      urlCache[i] = URL.createObjectURL(new Blob([bytes], {type: c.type || 'video/mp4'}));
+    }
+    return urlCache[i];
+  }
+  return c.src || '';
+}
+
+let loaded = false, current = -1, busy = false, timers = [], cdInterval = null;
+function later(fn, ms){ const t = setTimeout(fn, ms); timers.push(t); return t; }
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; clearInterval(cdInterval); cdInterval = null; }
+
+function countdown(done){
+  let n = 3; $('big').textContent = n; $('hint').textContent = 'for you';
+  cdInterval = setInterval(()=>{ n--; if(n>0){ $('big').textContent = n; } else { clearInterval(cdInterval); cdInterval = null; done(); } }, 700);
+}
+
+function resetScreen(msg){
+  loaded = false;
+  btns.forEach(b => b.disabled = true);
+  led.classList.remove('on');
+  screen.classList.remove('playing');
+  track.classList.remove('live');
+  $('big').textContent = '▶'; $('hint').textContent = msg || 'Pick a cassette to begin';
+  fill.style.width = '0%'; track.setAttribute('aria-valuenow', 0);
+}
+
+function ejectCurrent(cb){
+  clearTimers();
+  vid.pause();
+  if(current >= 0){ const t = tapeEls[current]; current = -1; resetScreen('Cassette ejected'); idlePick(); vid.removeAttribute('src'); vid.load(); busy = true; t.classList.add('out'); later(()=>{ t.classList.remove('in'); }, 30); later(()=>{ t.classList.remove('out'); busy = false; cb && cb(); }, 800); }
+  else cb && cb();
+}
+
+function insert(i){
+  const s = srcFor(i);
+  if(!s){ $('hint').textContent = 'No video has been added yet'; return; }
+  current = i; busy = true;
+  $('pick').textContent = 'now playing: ' + CASSETTES[i].label[0];
+  vid.src = s; vid.load();
+  vid.play().then(()=>vid.pause()).catch(()=>{});
+  tapeEls[i].classList.add('in');
+  $('hint').textContent = 'Loading…';
+  later(()=>{
+    countdown(()=>{
+      loaded = true; busy = false;
+      btns.forEach(b=>b.disabled=false);
+      led.classList.add('on'); screen.classList.add('playing'); track.classList.add('live');
+      vid.play();
+    });
+  }, 1000);
+}
+
+function choose(i){
+  if(busy || i === current || i !== topIdx) return;
+  insert(i);
+}
+$('insert').onclick = () => choose(topIdx);
+$('switch').onclick = () => {
+  if(busy) return;
+  const wasIn = current >= 0;
+  ejectCurrent(() => {
+    busy = true;
+    const old = tapeEls[topIdx];
+    const nxt = tapeEls[(topIdx + 1) % CASSETTES.length];
+    old.classList.add('slide');
+    nxt.classList.add('rise');
+    later(() => {
+      old.classList.remove('slide');
+      nxt.classList.remove('rise');
+      topIdx = (topIdx + 1) % CASSETTES.length;
+      renderStack(); idlePick();
+      later(() => { busy = false; if(wasIn) insert(topIdx); }, 700);
+    }, 380);
+  });
+};
+
+$('eject').onclick = () => { if(!busy) ejectCurrent(); };
+$('play').onclick = () => vid.play();
+$('pause').onclick = () => vid.pause();
+$('rew').onclick = () => { vid.currentTime = Math.max(0, vid.currentTime - 5); };
+$('fwd').onclick = () => { vid.currentTime = Math.min(vid.duration||1e9, vid.currentTime + 5); };
+$('again').onclick = () => { vid.currentTime = 0; vid.play(); };
+vid.addEventListener('ended', () => {
+  setTimeout(()=>$('noteBtn').classList.add('peek'), 600);
+});
+
+function updateTrack(){
+  const pct = vid.duration ? (vid.currentTime / vid.duration) * 100 : 0;
+  fill.style.width = pct + '%';
+  track.setAttribute('aria-valuenow', Math.round(pct));
+}
+vid.addEventListener('timeupdate', updateTrack);
+vid.addEventListener('ended', updateTrack);
+vid.addEventListener('loadedmetadata', updateTrack);
+btns.forEach(b => b.addEventListener('click', () => setTimeout(updateTrack, 50)));
+track.onclick = e => {
+  if(!loaded || !vid.duration) return;
+  const r = track.getBoundingClientRect();
+  vid.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * vid.duration;
+  updateTrack();
+};
+
+/* ---------- notes ---------- */
+const modal = $('modal');
+const NOTES = [
+  {title: NOTE_TITLE, lines: NOTE_LINES, sign: NOTE_SIGN},
+  {title: NOTE2_TITLE, lines: NOTE2_LINES, sign: NOTE2_SIGN}
+];
+let currentNote = 0, firstRead = false;
+// shrinks the letter text just enough so it fits on screen without scrolling
+function fitPaper(){
+  const p = modal.querySelector('.paper');
+  let s = 21; p.style.fontSize = s + 'px';
+  while(p.scrollHeight > p.clientHeight + 1 && s > 11){ s--; p.style.fontSize = s + 'px'; }
+}
+addEventListener('resize', () => { if(modal.classList.contains('open')) fitPaper(); });
+function showNote(n){
+  currentNote = n;
+  $('nTitle').textContent = NOTES[n].title;
+  $('nTitle').classList.toggle('center', n === 1);
+  const body = $('nBody'); body.innerHTML = '';
+  NOTES[n].lines.forEach(t => { const p = document.createElement('p'); p.textContent = t; body.appendChild(p); });
+  if(NOTES[n].sign){ const s = document.createElement('p'); s.className = 'sig'; s.textContent = NOTES[n].sign; body.appendChild(s); }
+  const act = $('nActions'); act.innerHTML = ''; act.className = '';
+  if(n === 1) buildChoices(act);
+  modal.classList.add('open'); fitPaper(); $('close').focus();
+}
+function closeModal(){
+  if(!modal.classList.contains('open')) return;
+  modal.classList.remove('open');
+  if(currentNote === 0 && !firstRead){
+    firstRead = true;
+    setTimeout(() => $('noteBtn2').classList.add('peek'), 500);
+  }
+}
+$('noteBtn').onclick = () => showNote(0);
+$('noteBtn2').onclick = () => { $('noteBtn2').classList.add('seen'); showNote(1); };
+$('close').onclick = closeModal;
+modal.onclick = e => { if(e.target === modal) closeModal(); };
+document.addEventListener('keydown', e => { if(e.key === 'Escape'){ closePlanner(); closeModal(); } });
+
+function buildChoices(box){
+  box.className = 'choices';
+  const yes = document.createElement('button'), no = document.createElement('button');
+  yes.className = 'yes'; yes.textContent = 'YES';
+  no.className = 'no'; no.textContent = 'NO';
+  yes.onclick = openPlanner;
+  no.onclick = () => {
+    no.disabled = true; no.classList.add('fade');
+    setTimeout(() => { no.textContent = 'YES'; no.className = 'yes fade'; void no.offsetWidth; no.classList.remove('fade'); }, 500);
+    setTimeout(openPlanner, 1500);
+  };
+  box.append(yes, no);
+}
+
+/* ---------- date planner ---------- */
+const planner = $('planner');
+let idea = '';
+$('pTitle').textContent = PLAN_TITLE;
+[...PLAN_IDEAS, 'others'].forEach(t => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = t;
+  b.onclick = () => {
+    idea = t; [...$('chips').children].forEach(c => c.classList.toggle('on', c === b));
+    const o = t === 'others'; $('pOther').classList.toggle('hide', !o); if(o) $('pOther').focus();
+  };
+  $('chips').appendChild(b);
+});
+$('pDate').min = new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+function openPlanner(){ modal.classList.remove('open'); planner.classList.add('open'); }
+function closePlanner(){ planner.classList.remove('open'); }
+$('pClose').onclick = closePlanner;
+planner.onclick = e => { if(e.target === planner) closePlanner(); };
+$('pSend').onclick = () => {
+  if(!$('pDate').value){ $('pDone').textContent = 'Pick a day first.'; return; }
+  const day = new Date($('pDate').value + 'T00:00').toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  const msg = ['Our date plan ♥', day + ($('pTime').value ? ' at ' + $('pTime').value : ''), (idea === 'others' ? ($('pOther').value.trim() || 'others') : idea), $('pPlace').value.trim() && 'Meet up: ' + $('pPlace').value.trim(), $('pWear').value && 'Dress: ' + $('pWear').value, $('pNote').value.trim()].filter(Boolean).join('\n');
+  if(PLANNER_FORM){
+    $('pSend').disabled = true; $('pDone').textContent = 'Sending…';
+    fetch(PLANNER_FORM, {method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body: JSON.stringify({_subject:'Our date plan ♥', message: msg})})
+      .then(r => { if(!r.ok) throw 0; $('pDone').textContent = 'Sent ♥'; })
+      .catch(() => { $('pSend').disabled = false; $('pDone').textContent = "Couldn't send. Check your connection and try again."; });
+    return;
+  }
+  if(PLANNER_EMAIL){
+    location.href = 'mailto:' + PLANNER_EMAIL + '?subject=' + encodeURIComponent('Our date plan ♥') + '&body=' + encodeURIComponent(msg);
+    $('pDone').textContent = 'Your plan is ready ♥'; return;
+  }
+  if(PLANNER_SMS){
+    location.href = 'sms:' + PLANNER_SMS + '&body=' + encodeURIComponent(msg);
+  } else if(navigator.share){
+    navigator.share({text: msg}).catch(() => {});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(msg); $('pDone').textContent = 'Plan copied. Paste it in a message to me ♥'; return;
+  }
+  $('pDone').textContent = 'Your plan is ready ♥';
+};
+</script>
+</body>
+</html>
